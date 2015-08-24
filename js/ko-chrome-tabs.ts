@@ -35,77 +35,85 @@ module koChromeTabs {
 		$('html').addClass('no-cssmasks');
 	}
 
-	var animationStyle, defaultNewTabData, tabTemplate, chromeTabs;
-
-	tabTemplate = '<div class="chrome-tab">\n    <div class="chrome-tab-favicon"></div>\n    <div class="chrome-tab-title"></div>\n    <div class="chrome-tab-close"></div>\n    <div class="chrome-tab-curves">\n        <div class="chrome-tab-curves-left-shadow"></div>\n        <div class="chrome-tab-curves-left-highlight"></div>\n        <div class="chrome-tab-curves-left"></div>\n        <div class="chrome-tab-curves-right-shadow"></div>\n        <div class="chrome-tab-curves-right-highlight"></div>\n        <div class="chrome-tab-curves-right"></div>\n    </div>\n</div>';
 
 
-	defaultNewTabData = {
-		title: 'New Tab',
-		favicon: '',
-		data: {}
-	};
 
-	animationStyle = document.createElement('style');
+	export class ChromeTabs {
 
-    chromeTabs = {
-		init: function(options) {
+		tabTemplate = '<div class="chrome-tab">\n    <div class="chrome-tab-favicon"></div>\n    <div class="chrome-tab-title"></div>\n    <div class="chrome-tab-close"></div>\n    <div class="chrome-tab-curves">\n        <div class="chrome-tab-curves-left-shadow"></div>\n        <div class="chrome-tab-curves-left-highlight"></div>\n        <div class="chrome-tab-curves-left"></div>\n        <div class="chrome-tab-curves-right-shadow"></div>\n        <div class="chrome-tab-curves-right-highlight"></div>\n        <div class="chrome-tab-curves-right"></div>\n    </div>\n</div>';
+
+
+		defaultNewTabData = {
+			title: 'New Tab',
+			favicon: '',
+			data: {}
+		};
+
+		animationStyle = document.createElement('style');
+
+		consutrctor() {
+
+
+		}
+
+
+		public init(options) {
 			var render;
 			$.extend(options.$shell.data(), options);
-			options.$shell.prepend(animationStyle);
+			options.$shell.prepend(this.animationStyle);
 			options.$shell.find('.chrome-tab').each(function() {
 				return $(this).data().tabData = {
 					data: {}
 				};
 			});
-			render = function() {
-				return chromeTabs.render(options.$shell);
+			render = () => {
+				return this.render(options.$shell);
 			};
-			$(window).resize(render);
-			return render();
-		},
-		render: function($shell) {
-			chromeTabs.fixTabSizes($shell);
-			chromeTabs.fixZIndexes($shell);
-			chromeTabs.setupEvents($shell);
-			chromeTabs.setupSortable($shell);
+			$(window).resize(render.bind(this));
+			return render.call(this);
+		}
+		public render($shell) {
+			this.fixTabSizes($shell);
+			this.fixZIndexes($shell);
+			this.setupEvents($shell);
+			this.setupSortable($shell);
 			return $shell.trigger('chromeTabRender');
-		},
-		setupSortable: function($shell) {
+		}
+		public setupSortable($shell) {
 			var $tabs;
 			$tabs = $shell.find('.chrome-tabs');
 			return $tabs.sortable({
 				axis: 'x',
 				tolerance: 'pointer',
 				cancel: '.chrome-tab-close',
-				start: function(e, ui) {
+				start: (e, ui) => {
 					ui.item.addClass('ui-sortable-draggable-item');
 					$shell.addClass('chrome-tabs-sorting');
-					chromeTabs.setupTabClones($shell, ui.item);
-					chromeTabs.fixZIndexes($shell);
+					this.setupTabClones($shell, ui.item);
+					this.fixZIndexes($shell);
 					if (!$(ui.item).hasClass('chrome-tab-current')) {
 						return $tabs.sortable('option', 'zIndex', $(ui.item).data().zIndex);
 					} else {
 						return $tabs.sortable('option', 'zIndex', $tabs.length + 40);
 					}
 				},
-				stop: function(e, ui) {
+				stop: (e, ui) => {
 					$('.ui-sortable-draggable-item').removeClass('ui-sortable-draggable-item');
 					$shell.removeClass('chrome-tabs-sorting');
-					chromeTabs.cleanUpTabClones($shell);
-					return chromeTabs.setCurrentTab($shell, $(ui.item));
+					this.cleanUpTabClones($shell);
+					return this.setCurrentTab($shell, $(ui.item));
 				},
-				change: function(e, ui) {
+				change: (e, ui) => {
 					var placeholderIndex;
 					placeholderIndex = ui.placeholder.index();
 					if (ui.helper.index() <= placeholderIndex) {
 						placeholderIndex -= 1;
 					}
-					return chromeTabs.animateSort($shell, placeholderIndex);
+					return this.animateSort($shell, placeholderIndex);
 				}
 			});
-		},
-		animateSort: function($shell, newPlaceholderIndex) {
+		}
+		public animateSort($shell, newPlaceholderIndex) {
 			var $clone, $placeholder, delta, placeholderIndex;
 			$clone = $shell.find('.chrome-tabs.chrome-tabs-clone');
 			$placeholder = $clone.find('.ui-sortable-placeholder');
@@ -120,8 +128,8 @@ module koChromeTabs {
 			} else if (delta === 1) {
 				return $($clone.find('.chrome-tab').get(newPlaceholderIndex)).after($placeholder);
 			}
-		},
-		setupTabClones: function($shell) {
+		}
+		public setupTabClones($shell, uiItem) {
 			var $clone, $lastClone, $tabsContainer;
 			$lastClone = $shell.find('.chrome-tabs.chrome-tabs-clone');
 			$tabsContainer = $shell.find('.chrome-tabs').first();
@@ -133,11 +141,11 @@ module koChromeTabs {
 			} else {
 				return $tabsContainer.after($clone);
 			}
-		},
-		cleanUpTabClones: function($shell) {
+		}
+		public cleanUpTabClones($shell) {
 			return $shell.find('.chrome-tabs.chrome-tabs-clone').remove();
-		},
-		fixTabSizes: function($shell) {
+		}
+		public fixTabSizes($shell) {
 			var $tabs, margin, width;
 			$tabs = $shell.find('.chrome-tab');
 			margin = (parseInt($tabs.first().css('marginLeft'), 10) + parseInt($tabs.first().css('marginRight'), 10)) || 0;
@@ -147,11 +155,11 @@ module koChromeTabs {
 			$tabs.css({
 				width: width
 			});
-			return setTimeout(function() {
-				return chromeTabs.setupAnimationStyles($shell);
+			return setTimeout(() => {
+				return this.setupAnimationStyles.call(this, $shell);
 			});
-		},
-		setupAnimationStyles: function($shell) {
+		}
+		public setupAnimationStyles($shell) {
 			var $tabs, offsetLeft, styleHTML;
 			styleHTML = '';
 			offsetLeft = $shell.find('.chrome-tabs').offset().left;
@@ -162,9 +170,9 @@ module koChromeTabs {
 				left = $tab.offset().left - offsetLeft - parseInt($tabs.first().css('marginLeft'), 10);
 				return styleHTML += ".chrome-tabs-clone .chrome-tab:nth-child(" + (i + 1) + ") {\n    left: " + left + "px\n}";
 			});
-			return animationStyle.innerHTML = styleHTML;
-		},
-		fixZIndexes: function($shell) {
+			return this.animationStyle.innerHTML = styleHTML;
+		}
+		public fixZIndexes($shell) {
 			var $tabs;
 			$tabs = $shell.find('.chrome-tab');
 			return $tabs.each(function(i) {
@@ -181,47 +189,47 @@ module koChromeTabs {
 					zIndex: zIndex
 				});
 			});
-		},
-		setupEvents: function($shell) {
-			$shell.unbind('dblclick').bind('dblclick', function() {
-				return chromeTabs.addNewTab($shell);
+		}
+		public setupEvents($shell) {
+			$shell.unbind('dblclick').bind('dblclick', () => {
+				return this.addNewTab($shell, null);
 			});
-			return $shell.find('.chrome-tab').each(function() {
+			return $shell.find('.chrome-tab').each((count, target) => {
 				var $tab;
-				$tab = $(this);
-				$tab.unbind('click').click(function() {
-					return chromeTabs.setCurrentTab($shell, $tab);
+				$tab = $(target);
+				$tab.unbind('click').click(() => {
+					return this.setCurrentTab($shell, $tab);
 				});
-				return $tab.find('.chrome-tab-close').unbind('click').click(function() {
-					return chromeTabs.closeTab($shell, $tab);
+				return $tab.find('.chrome-tab-close').unbind('click').click(() => {
+					return this.closeTab($shell, $tab);
 				});
 			});
-		},
-		addNewTab: function($shell, newTabData) {
+		}
+		public addNewTab($shell, newTabData) {
 			var $newTab, tabData;
-			$newTab = $(tabTemplate);
+			$newTab = $(this.tabTemplate);
 			$shell.find('.chrome-tabs').append($newTab);
-			tabData = $.extend(true, {}, defaultNewTabData, newTabData);
-			chromeTabs.updateTab($shell, $newTab, tabData);
-			return chromeTabs.setCurrentTab($shell, $newTab);
-		},
-		setCurrentTab: function($shell, $tab) {
+			tabData = $.extend(true, {}, this.defaultNewTabData, newTabData);
+			this.updateTab($shell, $newTab, tabData);
+			return this.setCurrentTab($shell, $newTab);
+		}
+		public setCurrentTab($shell, $tab) {
 			$shell.find('.chrome-tab-current').removeClass('chrome-tab-current');
 			$tab.addClass('chrome-tab-current');
-			return chromeTabs.render($shell);
-		},
-		closeTab: function($shell, $tab) {
+			return this.render($shell);
+		}
+		public closeTab($shell, $tab) {
 			if ($tab.hasClass('chrome-tab-current')) {
 				if ($tab.prev().length) {
-					chromeTabs.setCurrentTab($shell, $tab.prev());
+					this.setCurrentTab($shell, $tab.prev());
 				} else if ($tab.next().length) {
-					chromeTabs.setCurrentTab($shell, $tab.next());
+					this.setCurrentTab($shell, $tab.next());
 				}
 			}
 			$tab.remove();
-			return chromeTabs.render($shell);
-		},
-		updateTab: function($shell, $tab, tabData) {
+			return this.render($shell);
+		}
+		public updateTab($shell, $tab, tabData) {
 			$tab.find('.chrome-tab-title').html(tabData.title);
 			$tab.find('.chrome-tab-favicon').css({
 				backgroundImage: "url('" + tabData.favicon + "')"
@@ -231,5 +239,4 @@ module koChromeTabs {
 
 	}
 
-	window["chromeTabs"] = chromeTabs;
 }
